@@ -18,3 +18,4 @@
        cd examples
        python benchmark.py
        ```
+3. Edit these files to change the launch parameters
