@@ -11,6 +11,7 @@ from slam.segmenter import Segmenter, RansacSegmenter
 from slam.subdivider import Subdivider, SizeSubdivider
 from slam.utils import DatasetReader
 
+sys.path.append("../octreelib")
 from octreelib.grid import Grid, GridConfig
 
 
