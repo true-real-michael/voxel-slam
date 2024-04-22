@@ -16,6 +16,7 @@ BATCH_SIZE = 100  # number of poses processed in one batch during CUDA RANSAC
 
 DATASET_PATH = "../evaluation/kitti"
 DATASET_READER = KittiReader
+USE_CUDA = True
 
 
 def run_pipeline(point_clouds: List[o3d.geometry.PointCloud],
@@ -66,6 +67,9 @@ def run_pipeline(point_clouds: List[o3d.geometry.PointCloud],
 
 
 def measure(cuda, poses, iterations) -> Dict[str, float]:
+    initializations_timestamps = []
+    subdividers_timestamps = []
+    distributions_timestamps = []
     segmenters_timestamps = []
 
     for sample in range(iterations):
@@ -73,12 +77,17 @@ def measure(cuda, poses, iterations) -> Dict[str, float]:
 
         pipeline_durations = run_pipeline(point_clouds, create_configuration(), cuda)
 
+        initializations_timestamps.append(pipeline_durations.initialization)
+        subdividers_timestamps.append(pipeline_durations.subdividers)
+        distributions_timestamps.append(pipeline_durations.distribution)
         segmenters_timestamps.append(pipeline_durations.segmenters)
 
     device = 'CUDA' if cuda else 'CPU'
     result = {
-        f'{device}_mean': np.mean(segmenters_timestamps),
-        f'{device}_std': np.std(segmenters_timestamps),
+        'initializations': (np.mean(initializations_timestamps), np.std(initializations_timestamps)),
+        'subdividers': (np.mean(subdividers_timestamps), np.std(subdividers_timestamps)),
+        'distributions': (np.mean(distributions_timestamps), np.std(distributions_timestamps)),
+        f'{device}_segmenters': (np.mean(segmenters_timestamps), np.std(segmenters_timestamps)),
     }
 
     return result
@@ -87,9 +96,8 @@ def measure(cuda, poses, iterations) -> Dict[str, float]:
 benchmark_results = {}
 for poses in N_POSES:
     benchmark_results[poses] = {}
-    benchmark_results[poses] |= measure(True, poses, N_ITERATIONS)
-    # benchmark_results[poses] |= measure(False, poses, 1)  # for CPU benchmarking
+    benchmark_results[poses] |= measure(USE_CUDA, poses, N_ITERATIONS)
 
 df = pd.DataFrame(benchmark_results).T
 print(df)
-df.to_csv('benchmark.csv')
+df.to_csv(f'benchmark_{"CUDA" if USE_CUDA else "CPU"}.csv')
