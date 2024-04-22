@@ -8,6 +8,8 @@ from typing import List
 
 import numpy as np
 import open3d as o3d
+
+sys.path.append("../octreelib")
 from octreelib.grid import VisualizationConfig
 from octreelib.grid import GridVisualizationType
 

@@ -7,6 +7,7 @@ import open3d as o3d
 import pandas as pd
 
 sys.path.append("..")
+sys.path.append("../octreelib")
 from slam.utils import KittiReader
 from util import create_configuration, PipelineConfiguration, read_patch, PipelineDurations
 

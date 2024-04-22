@@ -1,0 +1,3 @@
+[submodule "octreelib"]
+	path = octreelib
+	url = https://github.com/prime-slam/octreelib.git
